@@ -17,6 +17,11 @@ public interface CovidRepository extends JpaRepository<Covid, Long> {
     // The clause 'AS continent' is required because when not using the alias, Hibernate will generate
     // a dummy alias for that column, so the result cannot map into IAggResult properly
     // Excluding case: divide by 0
-    @Query("SELECT continent AS continent, 1.0 * NVL(SUM(death), 0) / (NVL(SUM(active), 0) + NVL(SUM(death), 0) + NVL(SUM(recovered), 0)) AS impactFactor FROM covid GROUP BY continent")
+    @Query(
+        "SELECT " +
+        "   continent AS continent, " +
+        "   1.0 * NVL(SUM(death), 0) / DECODE( (NVL(SUM(active), 0) + NVL(SUM(death), 0) + NVL(SUM(recovered), 0)), 0, 1, (NVL(SUM(active), 0) + NVL(SUM(death), 0) + NVL(SUM(recovered), 0)) ) AS impactFactor " +
+        "FROM covid " +
+        "GROUP BY continent")
     List<IAggResult> getImpactFactors();
 }
